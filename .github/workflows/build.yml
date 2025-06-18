@@ -36,7 +36,7 @@ jobs:
           make -j$(nproc) V=s
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: k2p-firmware
           path: openwrt/bin/targets/bcm53xx/phicomm-k2p/*.sysupgrade.bin
