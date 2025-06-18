@@ -1,0 +1,42 @@
+name: Build OpenWrt K2P
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Download OpenWrt source
+        run: |
+          [ -d openwrt ] || git clone --depth 1 https://github.com/coolsnowwolf/lede openwrt
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Copy custom .config
+        run: |
+          cd openwrt
+          cp ../.config .config
+
+      - name: Build
+        run: |
+          cd openwrt
+          make defconfig
+          make -j$(nproc) V=s
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: k2p-firmware
+          path: openwrt/bin/targets/bcm53xx/phicomm-k2p/*.sysupgrade.bin
